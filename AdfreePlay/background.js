@@ -1,0 +1,61 @@
+/**
+ *  extension on/off flag
+ **/
+var isActive = true;
+
+/**
+ *  avoid recursive XHR listening
+ **/
+var requestActive = false;
+
+/**
+ *  extension on/off button support
+ **/
+chrome.browserAction.onClicked.addListener(function() {
+    chrome.browserAction.getTitle({}, function(result) {
+        if (result == "AdfreePlay Off") {
+            chrome.browserAction.setTitle({title:'AdfreePlay On'});
+            chrome.browserAction.setIcon({path: 'iconinactive128.png'});
+            isActive = false;
+        } else {
+            chrome.browserAction.setTitle({title:'AdfreePlay Off'});
+            chrome.browserAction.setIcon({path: 'iconactive128.png'});
+            isActive = true;
+        }
+        chrome.tabs.getSelected(null, function(tab) {
+            chrome.tabs.executeScript(tab.id, {code: 'window.location.reload();'});
+        });
+    });
+});
+
+/**
+ *  listen for content script messages
+ **/
+chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+        if (typeof request.isActive !== 'undefined') {
+            sendResponse({isActive: isActive});
+        }
+        if (typeof request.requestBlock !== 'undefined') {
+            requestActive = request.requestBlock;
+        }
+    }
+);
+
+/**
+ * detect certain XHR calls that we are interested in
+ **/
+chrome.webRequest.onCompleted.addListener(
+    function(response) {
+        if (response.url.match(/\/api\/getVideo/)) {
+            if (isActive === true && requestActive === false) {
+                requestActive = true;
+                chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                    chrome.tabs.sendMessage(tabs[0].id, {kanal5: response}, function(response) {});
+                });
+            }
+        }
+        return;
+    },
+    { urls: ["<all_urls>"] }, ["responseHeaders"]
+);

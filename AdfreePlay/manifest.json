@@ -1,6 +1,6 @@
 {
     "name": "AdfreePlay",
-    "version": "0.0.2",
+    "version": "0.0.4",
     "manifest_version": 2,
     "description": "This extension will remove ads from swedish television 'Play'-sites.",
     "icons": {

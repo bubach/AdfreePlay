@@ -24,6 +24,21 @@ function addCustomPlayer(baseUrl, videoUrl, type) {
             canvas: {backgroundGradient: 'none'}
         });
     }
+    if (type == "mp4") {
+        $f("h4xx0r", "http://bubach.net/swf/flowplayer-3.2.18.swf", {
+            clip: { url: videoUrl, scaling: 'fit', type: 'video/mp4' },
+            canvas: {backgroundGradient: 'none'}
+        });
+    }
+}
+
+/**
+ * Try and clean up the console from random errors
+ */
+function killRandomCrapJS() {
+    for (var i = 1; i < 99999; i++) {
+        window.clearInterval(i);
+    };
 }
 
 // main code
@@ -36,7 +51,7 @@ $(document).ready(function() {
          *  handle any tv4play requests
          **/
         if ($("#video-player-wrapper #player #player-container").length != 0) {
-            var dataId = $("#video-player-wrapper #player #player-container").attr("data-vid");
+            var dataId = JSON.parse($("#video-player-wrapper #player #player-container").attr("data-asset")).id;
             $.get("http://prima.tv4play.se/api/web/asset/"+dataId+"/play?protocol=hls", function(xml) {
                 var hlsUrl = $("item", xml).first().find("url").text();
                 if (hlsUrl != "") {
@@ -44,6 +59,10 @@ $(document).ready(function() {
                     $("div.video-size-buttons").remove();
                     $("#video-player-wrapper #player").html("").attr("id","h4xx0r").width("100%");
                     addCustomPlayer("", hlsUrl, "hls");
+                    $("#h4xx0r").height("100%");
+                    setTimeout(function(){
+                        killRandomCrapJS();
+                    }, 1000);
                 }
             });
         }
@@ -68,6 +87,25 @@ $(document).ready(function() {
             });
         }
 
+        /**
+         * Aftonblaskan pwnage
+         */
+        if ($("#main-container #abtv-ad-lager").length != 0) {
+            $("#main-container #abtv-ad-lager").remove();
+            $(".display-ad").remove();
+            var videoId = JSON.parse($(".desktop-main-col .player").attr("data-player-config")).videoId;
+            $.getJSON("http://aftonbladet-play-metadata.cdn.drvideo.aptoma.no/video/"+videoId+".json", function(data) {
+                videoId         = data.videoId;
+                var firstThree  = videoId.substr(0, 3);
+                var secondThree = videoId.substr(3, 3);
+                var thirdThree  = videoId.substr(6, 3);
+                var completeUrl = "http://abvodps-akamai.aftonbladet.se/production/streaming/global/"+firstThree+"/"+secondThree+"/"+thirdThree+"/"+videoId+"/640_360_800.mp4";
+                var height      = $(".desktop-main-col .player").height();
+                $(".desktop-main-col .player").html("").attr("id", "h4xx0r").height(height+'px');
+                addCustomPlayer("", completeUrl, "mp4");
+            });
+        }
+
     }
 });
 
@@ -84,10 +122,7 @@ chrome.runtime.onMessage.addListener(
                     var videoUrl = "";
 
                     $(".sbs-notification-bar-fixed").hide();
-                    // kill old JS not relevant to our needs.
-                    for (var i = 1; i < 99999; i++) {
-                        window.clearInterval(i);
-                    };
+                    killRandomCrapJS();
 
                     if (typeof json.streamBaseUrl != 'undefined') {
                         baseUrl = json.streamBaseUrl;

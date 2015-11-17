@@ -110,36 +110,33 @@ $(document).ready(function() {
 });
 
 /**
- *  handle any kanal5play/kanal9play/kanal11play requests
+ *  handle any kanal5play/kanal9play/kanal11play (dplay) requests
  **/
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
         if (isActive) {
-            if (typeof request.kanal5 !== 'undefined') {
-                $.getJSON(request.kanal5.url, function(json) {
+            if (typeof request.dplay !== 'undefined') {
+                var url = decodeURI(request.dplay.url);
+                url = url.replace("stream_type=hds","stream_type=hls");
+                $.getJSON(url, function(json) {
                     chrome.runtime.sendMessage({requestBlock: false}, function(response) {});
                     var baseUrl  = "";
                     var videoUrl = "";
-
-                    $(".sbs-notification-bar-fixed").hide();
                     killRandomCrapJS();
 
-                    if (typeof json.streamBaseUrl != 'undefined') {
-                        baseUrl = json.streamBaseUrl;
-                    }
-                    if (typeof json.streams != 'undefined') {
-                        var tmpBitrate = 0;
-                        for (var index = 0; index < json.streams.length; ++index) {
-                            if (json.streams[index].bitrate > tmpBitrate) {
-                                tmpBitrate = json.streams[index].bitrate;
-                                videoUrl   = json.streams[index].source;
+                    if (typeof json.hls != 'undefined') {
+                        videoUrl = decodeURI(json.hls);
+                        $.get(videoUrl, function(response) {
+                            var regex  = /\".*\"[\S\s](.*)/;
+                            var result = regex.exec(response);
+                            videoUrl   = result[1];
+                            if (videoUrl !== null) {
+                                videoUrl = videoUrl.replace("https","http");
+                                var height = $("#video-player-bg").height();
+                                $("#video-player-bg").html('').attr("id","h4xx0r").height(height+'px');
+                                addCustomPlayer(baseUrl, videoUrl, "hls");
                             }
-                        }
-                    }
-                    if (baseUrl != "" && videoUrl != "") {
-                        $("a").removeClass("ajax");
-                        $(".sbs-player-home").html('').attr("id","h4xx0r");
-                        addCustomPlayer(baseUrl, videoUrl, "rtmp");
+                        });
                     }
                 });
             }

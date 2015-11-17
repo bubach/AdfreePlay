@@ -47,11 +47,11 @@ chrome.runtime.onMessage.addListener(
  **/
 chrome.webRequest.onCompleted.addListener(
     function(response) {
-        if (response.url.match(/\/api\/getVideo/)) {
+        if (response.url.match(/\/secure\/api\/v2\/user\/authorization/)) {
             if (isActive === true && requestActive === false) {
                 requestActive = true;
                 chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-                    chrome.tabs.sendMessage(tabs[0].id, {kanal5: response}, function(response) {});
+                    chrome.tabs.sendMessage(tabs[0].id, {dplay: response}, function(response) {});
                 });
             }
         }

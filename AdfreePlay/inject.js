@@ -9,7 +9,7 @@ chrome.runtime.sendMessage({isActive: ""}, function(response) {
 /**
  *  adds the custom player to newly formed h4xx0r element in DOM
  **/
-function addCustomPlayer(baseUrl, videoUrl, type) {
+function addCustomPlayer(baseUrl, videoUrl, type, isLive) {
     if (type == "rtmp") {
         $f("h4xx0r", "http://bubach.net/swf/flowplayer-3.2.18.swf", {
             clip: { url: videoUrl, scaling: 'fit', provider: 'hddn' },
@@ -18,9 +18,18 @@ function addCustomPlayer(baseUrl, videoUrl, type) {
         });
     }
     if (type == "hls") {
+        videoUrl = (videoUrl.indexOf('https') > -1)?videoUrl.replace('https','http'):videoUrl;
         $f("h4xx0r", "http://bubach.net/swf/flowplayer-3.2.18.swf", {
-            plugins: { httpstreaming: { url: "http://bubach.net/swf/flashlsFlowPlayer-0.4.0.7.swf", hls_startfromlevel: 1}},
-            clip: { url: videoUrl, scaling: 'fit', urlResolvers: ["httpstreaming","brselect"], provider: "httpstreaming"},
+            plugins: { 
+                httpstreaming: { url: "http://bubach.net/swf/flashlsFlowPlayer-0.4.0.7.swf", hls_startfromlevel: 1}
+            },
+            clip: { 
+                url: videoUrl,
+                live: isLive,
+                scaling: 'fit', 
+                urlResolvers: ["httpstreaming","brselect"], 
+                provider: "httpstreaming"
+            },
             canvas: {backgroundGradient: 'none'}
         });
     }
@@ -54,12 +63,13 @@ $(document).ready(function() {
             var dataId = JSON.parse($("#video-player-wrapper #player #player-container").attr("data-asset")).id;
             $.get("http://prima.tv4play.se/api/web/asset/"+dataId+"/play?protocol=hls", function(xml) {
                 var hlsUrl = $("item", xml).first().find("url").text();
+                var isLive = $("live", xml).text();
                 if (hlsUrl != "") {
                     $("#video-player-wrapper #player #player-container").remove();
                     $("div.video-size-buttons").remove();
-                    $("#video-player-wrapper #player").html("").attr("id","h4xx0r").width("100%");
-                    addCustomPlayer("", hlsUrl, "hls");
-                    $("#h4xx0r").height("100%");
+                    $("#video-player-wrapper #player").html("").attr("id","h4xx0r").width("877px");
+                    addCustomPlayer("", hlsUrl, "hls", isLive);
+                    $("#h4xx0r").height("495px");
                     setTimeout(function(){
                         killRandomCrapJS();
                     }, 1000);

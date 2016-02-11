@@ -18,7 +18,7 @@ function addCustomPlayer(baseUrl, videoUrl, type, isLive) {
         });
     }
     if (type == "hls") {
-        videoUrl = (videoUrl.indexOf('https') > -1)?videoUrl.replace('https','http'):videoUrl;
+        videoUrl = (videoUrl.indexOf('https') > -1) ? videoUrl.replace('https','http') : videoUrl;
         $f("h4xx0r", "http://bubach.net/swf/flowplayer-3.2.18.swf", {
             plugins: { 
                 httpstreaming: { url: "http://bubach.net/swf/flashlsFlowPlayer-0.4.0.7.swf", hls_startfromlevel: 1}

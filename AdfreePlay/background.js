@@ -55,6 +55,14 @@ chrome.webRequest.onCompleted.addListener(
                 });
             }
         }
+        if (response.url.match(/tv\/v3\/videos\/stream/)) {
+            if (isActive === true && requestActive === false) {
+                requestActive = true;
+                chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                    chrome.tabs.sendMessage(tabs[0].id, {viafree: response}, function(response) {});
+                });
+            }
+        }
         return;
     },
     { urls: ["<all_urls>"] }, ["responseHeaders"]

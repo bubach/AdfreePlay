@@ -100,33 +100,6 @@ $(document).ready(function() {
 });
 
 /**
- *    handle any tv3play/tv6play/tv8play/tv10play (viafree.se) requests
- **/
-chrome.runtime.onMessage.addListener(
-    function(request, sender, sendResponse) {
-        if (isActive) {
-            if (typeof request.viafree !== 'undefined') {
-                var url = decodeURI(request.viafree.url);
-                $.getJSON(url, function(data) {
-                    chrome.runtime.sendMessage({requestBlock: false}, function(response) {});
-                    var hlsUrl = "";
-                    if (typeof data.streams != 'undefined') {
-                        if (typeof data.streams.hls != 'undefined' && data.streams.hls != null) {
-                            hlsUrl  = data.streams.hls;
-                        }
-                    }
-                    if (hlsUrl != "") {
-                        var height = $("#video-player").height();
-                        $("#video-player").html("").attr("id","h4xx0r").height(height+"px");
-                        addCustomPlayer("", hlsUrl, "hls");
-                    }
-                });
-            }
-        }
-    }
-);
-
-/**
  *  handle any kanal5play/kanal9play/kanal11play (dplay) requests
  **/
 chrome.runtime.onMessage.addListener(

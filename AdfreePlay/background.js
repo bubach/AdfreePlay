@@ -45,6 +45,13 @@ chrome.runtime.onMessage.addListener(
 /**
  * detect certain XHR calls that we are interested in
  **/
+chrome.webRequest.onBeforeRequest.addListener(
+    function(details) {
+        return {cancel: details.url.indexOf("MTG_Brightcove_HTML5/AdManager.js") != -1};
+    },
+    {urls: ["<all_urls>"]}, ["blocking"]
+);
+
 chrome.webRequest.onCompleted.addListener(
     function(response) {
         if (response.url.match(/\/secure\/api\/v2\/user\/authorization/)) {
@@ -52,14 +59,6 @@ chrome.webRequest.onCompleted.addListener(
                 requestActive = true;
                 chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
                     chrome.tabs.sendMessage(tabs[0].id, {dplay: response}, function(response) {});
-                });
-            }
-        }
-        if (response.url.match(/tv\/v3\/videos\/stream/)) {
-            if (isActive === true && requestActive === false) {
-                requestActive = true;
-                chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-                    chrome.tabs.sendMessage(tabs[0].id, {viafree: response}, function(response) {});
                 });
             }
         }

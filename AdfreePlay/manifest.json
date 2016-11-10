@@ -1,6 +1,6 @@
 {
     "name": "AdfreePlay",
-    "version": "0.0.9",
+    "version": "0.1.0",
     "manifest_version": 2,
     "description": "This extension will remove ads from swedish television 'Play'-sites.",
     "icons": {
@@ -27,6 +27,6 @@
     ],
     "browser_action": {
         "default_icon": "iconactive128.png",
-        "default_title": "AdfreePlay Off"
+        "default_title": "Turn AdfreePlay Off"
     }
 }

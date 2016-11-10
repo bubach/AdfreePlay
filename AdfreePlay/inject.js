@@ -3,7 +3,11 @@
  **/
 var isActive;
 chrome.runtime.sendMessage({isActive: ""}, function(response) {
-    isActive = response.isActive;
+    if (typeof response === 'undefined') {
+        isActive = true;
+    } else {
+        isActive = response.isActive;
+    }
 });
 
 /**
@@ -61,7 +65,7 @@ $(document).ready(function() {
          **/
         if ($("#video-player-wrapper #player #player-container").length != 0) {
             var dataId = JSON.parse($("#video-player-wrapper #player #player-container").attr("data-asset")).id;
-            $.get("http://prima.tv4play.se/api/web/asset/"+dataId+"/play?protocol=hls", function(xml) {
+            $.get("http://prima.tv4play.se/api/web/asset/"+dataId+"/play?protocol=hls3", function(xml) {
                 var hlsUrl = $("item", xml).first().find("url").text();
                 var isLive = $("live", xml).text();
                 if (hlsUrl != "") {
@@ -100,7 +104,34 @@ $(document).ready(function() {
 });
 
 /**
+ *  videojs freewheel code
+ *     some next level BS needed right here, as with most things JavaScript.
+ */
+function killFreewheel()
+{
+    var injectedCode = function() {
+        if (typeof window.videojs !== 'undefined') {
+            for (var player in window.videojs.players) {
+                window.videojs.players[player].freewheel.slots = [];
+                window.setInterval(function() {
+                    var freewheel = window.videojs.players[player].freewheel;
+                    if (typeof freewheel._currentSlot !== 'undefined' && freewheel._currentSlot !== null) {
+                        freewheel._currentSlot.skipCurrentAd();
+                    }
+                }, 200);
+            }
+        }
+    };
+
+    var script = document.createElement('script');
+    script.textContent = '(' + injectedCode + ')()';
+    (document.head||document.documentElement).appendChild(script);
+    script.parentNode.removeChild(script);
+}
+
+/**
  *  handle any kanal5play/kanal9play/kanal11play (dplay) requests
+ *  also listener for viafree AdManager event
  **/
 chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
@@ -129,6 +160,9 @@ chrome.runtime.onMessage.addListener(
                         });
                     }
                 });
+            }
+            if (typeof request.viafree !== 'undefined') {
+                killFreewheel();
             }
         }
     }

@@ -13,12 +13,12 @@ var requestActive = false;
  **/
 chrome.browserAction.onClicked.addListener(function() {
     chrome.browserAction.getTitle({}, function(result) {
-        if (result == "AdfreePlay Off") {
-            chrome.browserAction.setTitle({title:'AdfreePlay On'});
+        if (result == "Turn AdfreePlay Off") {
+            chrome.browserAction.setTitle({title:'Turn AdfreePlay On'});
             chrome.browserAction.setIcon({path: 'iconinactive128.png'});
             isActive = false;
         } else {
-            chrome.browserAction.setTitle({title:'AdfreePlay Off'});
+            chrome.browserAction.setTitle({title:'Turn AdfreePlay Off'});
             chrome.browserAction.setIcon({path: 'iconactive128.png'});
             isActive = true;
         }
@@ -45,13 +45,6 @@ chrome.runtime.onMessage.addListener(
 /**
  * detect certain XHR calls that we are interested in
  **/
-chrome.webRequest.onBeforeRequest.addListener(
-    function(details) {
-        return {cancel: details.url.indexOf("MTG_Brightcove_HTML5/AdManager.js") != -1};
-    },
-    {urls: ["<all_urls>"]}, ["blocking"]
-);
-
 chrome.webRequest.onCompleted.addListener(
     function(response) {
         if (response.url.match(/\/secure\/api\/v2\/user\/authorization/)) {
@@ -61,6 +54,11 @@ chrome.webRequest.onCompleted.addListener(
                     chrome.tabs.sendMessage(tabs[0].id, {dplay: response}, function(response) {});
                 });
             }
+        }
+        if (isActive === true && response.url.match(/MTG_Brightcove_HTML5\/AdManager.js/)) {
+            chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+                chrome.tabs.sendMessage(tabs[0].id, {viafree: response}, function(response) {});
+            });
         }
         return;
     },

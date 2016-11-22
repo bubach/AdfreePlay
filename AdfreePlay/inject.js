@@ -54,28 +54,42 @@ function killRandomCrapJS() {
     };
 }
 
-// main code
-$(document).ready(function() {
-    console.info("AdfreePlay plugin loaded!");
 
-    if (isActive) {
+/**
+ * So I guess document ready can't be trusted... Fun times.
+ */
+var triggerHandle = null;
+function intervalTrigger() {
+    var triggerCount = 0;
+    triggerHandle = window.setInterval(function() {
 
         /**
          *  handle any tv4play requests
          **/
-        if ($("#video-player-wrapper #player #player-container").length != 0) {
-            var dataId = JSON.parse($("#video-player-wrapper #player #player-container").attr("data-asset")).id;
+        if ($("#signUpDialog").length != 0) {
+            $("#signUpDialog").hide();
+        }
+        if ($("#video-player-wrapper").length != 0) {
+            var dataId = $("#video-player-wrapper .player-container").attr("data-asset-id");
             $.get("http://prima.tv4play.se/api/web/asset/"+dataId+"/play?protocol=hls3", function(xml) {
                 var hlsUrl = $("item", xml).first().find("url").text();
                 var isLive = $("live", xml).text();
                 if (hlsUrl != "") {
-                    $("#video-player-wrapper #player #player-container").remove();
+                    var containerWidth  = $("#player-container").width();
+                    var containerHeight = $("#player-container").height();
+                    if (containerWidth < 500) {
+                        containerWidth  = 877;
+                        containerHeight = 495;
+                    }
+                    $("#video-player-wrapper .player-container").remove();
                     $("div.video-size-buttons").remove();
-                    $("#video-player-wrapper #player").html("").attr("id","h4xx0r").width("877px");
+                    $("#video-player-wrapper #player").html("").attr("id","h4xx0r").width(containerWidth + "px");
                     addCustomPlayer("", hlsUrl, "hls", isLive);
-                    $("#h4xx0r").height("495px");
+                    $("#h4xx0r").height(containerHeight + "px");
+                    window.clearInterval(triggerHandle);
                     setTimeout(function(){
                         killRandomCrapJS();
+                        $("#signUpDialog").hide();
                     }, 1000);
                 }
             });
@@ -97,9 +111,22 @@ $(document).ready(function() {
                 var height      = $(".desktop-main-col .player").height();
                 $(".desktop-main-col .player").html("").attr("id", "h4xx0r").height(height+'px');
                 addCustomPlayer("", completeUrl, "mp4");
+                window.clearInterval(triggerHandle);
             });
         }
+        triggerCount++;
+        if (triggerCount > 10) {
+            window.clearInterval(triggerHandle);
+        }
+    }, 1000);
+};
 
+// main code
+$(document).ready(function() {
+    console.info("AdfreePlay plugin loaded!");
+
+    if (isActive) {
+        intervalTrigger();
     }
 });
 

@@ -15,17 +15,17 @@ chrome.runtime.sendMessage({isActive: ""}, function(response) {
  **/
 function addCustomPlayer(baseUrl, videoUrl, type, isLive) {
     if (type == "rtmp") {
-        $f("h4xx0r", "http://bubach.net/swf/flowplayer-3.2.18.swf", {
+        $f("h4xx0r", "https://manu2.manufrog.com/~bubach/hemsida/swf/flowplayer-3.2.18.swf", {
             clip: { url: videoUrl, scaling: 'fit', provider: 'hddn' },
-            plugins: { hddn: { url: "http://bubach.net/swf/flowplayer.rtmp-3.2.13.swf", netConnectionUrl: baseUrl } },
+            plugins: { hddn: { url: "https://manu2.manufrog.com/~bubach/hemsida/swf/flowplayer.rtmp-3.2.13.swf", netConnectionUrl: baseUrl } },
             canvas: {backgroundGradient: 'none'}
         });
     }
     if (type == "hls") {
         videoUrl = (videoUrl.indexOf('https') > -1) ? videoUrl.replace('https','http') : videoUrl;
-        $f("h4xx0r", "http://bubach.net/swf/flowplayer-3.2.18.swf", {
+        $f("h4xx0r", "https://manu2.manufrog.com/~bubach/hemsida//swf/flowplayer-3.2.18.swf", {
             plugins: {
-                httpstreaming: { url: "http://bubach.net/swf/flashlsFlowPlayer-0.4.0.7.swf", hls_startfromlevel: 1}
+                httpstreaming: { url: "https://manu2.manufrog.com/~bubach/hemsida/swf/flashlsFlowPlayer-0.4.0.7.swf", hls_startfromlevel: 1}
             },
             clip: {
                 url: videoUrl,
@@ -38,7 +38,7 @@ function addCustomPlayer(baseUrl, videoUrl, type, isLive) {
         });
     }
     if (type == "mp4") {
-        $f("h4xx0r", "http://bubach.net/swf/flowplayer-3.2.18.swf", {
+        $f("h4xx0r", "https://manu2.manufrog.com/~bubach/hemsida/swf/flowplayer-3.2.18.swf", {
             clip: { url: videoUrl, scaling: 'fit', type: 'video/mp4' },
             canvas: {backgroundGradient: 'none'}
         });
@@ -69,30 +69,45 @@ function intervalTrigger() {
         if ($("#signUpDialog").length != 0) {
             $("#signUpDialog").hide();
         }
+        if ($("#signup-overlay").length != 0) {
+            $("#signup-overlay").hide();
+        }
         if ($("#video-player-wrapper").length != 0) {
-            var dataId = $("#video-player-wrapper .player-container").attr("data-asset-id");
-            $.get("http://prima.tv4play.se/api/web/asset/"+dataId+"/play?protocol=hls3", function(xml) {
-                var hlsUrl = $("item", xml).first().find("url").text();
-                var isLive = $("live", xml).text();
-                if (hlsUrl != "") {
-                    var containerWidth  = $("#player-container").width();
-                    var containerHeight = $("#player-container").height();
-                    if (containerWidth < 500) {
-                        containerWidth  = 877;
-                        containerHeight = 495;
+            if ($("#tv4video-id").length == 0) {
+                var injectedCode = function() {
+                    var dataId = JSON.parse(window.prefetched[0].data).data.videoAsset.id;
+                    $("body").append('<div id="tv4video-id">'+dataId+'</div>');
+                };
+
+                var script = document.createElement('script');
+                script.textContent = '(' + injectedCode + ')()';
+                (document.head||document.documentElement).appendChild(script);
+                script.parentNode.removeChild(script);
+            } else {
+                var dataId = $("#tv4video-id").text();
+
+                $.get("https://prima.tv4play.se/api/web/asset/"+dataId+"/play?protocol=hls3", function(xml) {
+                    var hlsUrl = $("item", xml).first().find("url").text();
+                    var isLive = $("live", xml).text();
+                    if (hlsUrl != "") {
+                        var containerWidth  = $("#player-container").width();
+                        var containerHeight = $("#player-container").height();
+                        if (containerWidth < 500) {
+                            containerWidth  = 877;
+                            containerHeight = 495;
+                        }
+                        $('div.module-center-wrapper').prepend('<div id="h4xx0r"></div>');
+
+                        addCustomPlayer("", hlsUrl, "hls", isLive);
+                        $("#h4xx0r").height(containerHeight + "px");
+                        window.clearInterval(triggerHandle);
+                        setTimeout(function(){
+                            killRandomCrapJS();
+                            $("#signUpDialog").hide();
+                        }, 1000);
                     }
-                    $("#video-player-wrapper .player-container").remove();
-                    $("div.video-size-buttons").remove();
-                    $("#video-player-wrapper #player").html("").attr("id","h4xx0r").width(containerWidth + "px");
-                    addCustomPlayer("", hlsUrl, "hls", isLive);
-                    $("#h4xx0r").height(containerHeight + "px");
-                    window.clearInterval(triggerHandle);
-                    setTimeout(function(){
-                        killRandomCrapJS();
-                        $("#signUpDialog").hide();
-                    }, 1000);
-                }
-            });
+                });
+            }
         }
 
         /**
@@ -102,12 +117,12 @@ function intervalTrigger() {
             $("#main-container #abtv-ad-lager").remove();
             $(".display-ad").remove();
             var videoId = JSON.parse($(".desktop-main-col .player").attr("data-player-config")).videoId;
-            $.getJSON("http://aftonbladet-play-metadata.cdn.drvideo.aptoma.no/video/"+videoId+".json", function(data) {
+            $.getJSON("https://aftonbladet-play-metadata.cdn.drvideo.aptoma.no/video/"+videoId+".json", function(data) {
                 videoId         = data.videoId;
                 var firstThree  = videoId.substr(0, 3);
                 var secondThree = videoId.substr(3, 3);
                 var thirdThree  = videoId.substr(6, 3);
-                var completeUrl = "http://abvodps-akamai.aftonbladet.se/production/streaming/global/"+firstThree+"/"+secondThree+"/"+thirdThree+"/"+videoId+"/640_360_800.mp4";
+                var completeUrl = "https://abvodps-akamai.aftonbladet.se/production/streaming/global/"+firstThree+"/"+secondThree+"/"+thirdThree+"/"+videoId+"/640_360_800.mp4";
                 var height      = $(".desktop-main-col .player").height();
                 $(".desktop-main-col .player").html("").attr("id", "h4xx0r").height(height+'px');
                 addCustomPlayer("", completeUrl, "mp4");

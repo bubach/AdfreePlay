@@ -15,17 +15,17 @@ chrome.runtime.sendMessage({isActive: ""}, function(response) {
  **/
 function addCustomPlayer(baseUrl, videoUrl, type, isLive) {
     if (type == "rtmp") {
-        $f("h4xx0r", "https://manu2.manufrog.com/~bubach/hemsida/swf/flowplayer-3.2.18.swf", {
+        $f("h4xx0r", "https://bubach.net/swf/flowplayer-3.2.18.swf", {
             clip: { url: videoUrl, scaling: 'fit', provider: 'hddn' },
-            plugins: { hddn: { url: "https://manu2.manufrog.com/~bubach/hemsida/swf/flowplayer.rtmp-3.2.13.swf", netConnectionUrl: baseUrl } },
+            plugins: { hddn: { url: "https://bubach.net/swf/flowplayer.rtmp-3.2.13.swf", netConnectionUrl: baseUrl } },
             canvas: {backgroundGradient: 'none'}
         });
     }
     if (type == "hls") {
         videoUrl = (videoUrl.indexOf('https') > -1) ? videoUrl.replace('https','http') : videoUrl;
-        $f("h4xx0r", "https://manu2.manufrog.com/~bubach/hemsida//swf/flowplayer-3.2.18.swf", {
+        $f("h4xx0r", "https://bubach.net/swf/flowplayer-3.2.18.swf", {
             plugins: {
-                httpstreaming: { url: "https://manu2.manufrog.com/~bubach/hemsida/swf/flashlsFlowPlayer-0.4.0.7.swf", hls_startfromlevel: 1}
+                httpstreaming: { url: "https://bubach.net/swf/flashlsFlowPlayer-0.4.0.7.swf", hls_startfromlevel: 1}
             },
             clip: {
                 url: videoUrl,
@@ -38,7 +38,7 @@ function addCustomPlayer(baseUrl, videoUrl, type, isLive) {
         });
     }
     if (type == "mp4") {
-        $f("h4xx0r", "https://manu2.manufrog.com/~bubach/hemsida/swf/flowplayer-3.2.18.swf", {
+        $f("h4xx0r", "https://bubach.net/swf/flowplayer-3.2.18.swf", {
             clip: { url: videoUrl, scaling: 'fit', type: 'video/mp4' },
             canvas: {backgroundGradient: 'none'}
         });
